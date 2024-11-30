@@ -1,1 +1,1 @@
-# online-fruit-shop-bot
+# fruit-shop-bot
