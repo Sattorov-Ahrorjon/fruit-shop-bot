@@ -1,9 +1,13 @@
 from aiogram import types, Router
 from aiogram.fsm.context import FSMContext
-from utils.db_api.views import user_create
 from states.register import Register
+from states.target import Target
 from keyboards.default.user import language
 from keyboards.default.product import products_keyboard
+from keyboards.inline.target import target_check
+from utils.db_api.views import (
+    user_create, sendAdvertisement
+)
 
 router = Router()
 
@@ -40,3 +44,43 @@ async def bot_start(message: types.Message, state: FSMContext):
         text=msg_text,
         reply_markup=reply_btn
     )
+
+
+@router.message(lambda msg: msg.text == '/target')
+async def create_advertisement(message: types.Message, state: FSMContext):
+    await message.answer(
+        text="Tayyorlangan reklama habaringizni telegram botga yuborishingiz mumkin\n"
+             "Telegram bot barcha foydalanuchilarga bu habarni yetkazadi 🔥"
+    )
+    await state.set_state(Target.target)
+
+
+@router.message(Target.target)
+async def send_advertisement(message: types.Message, state: FSMContext):
+    await state.update_data({'target': message.message_id})
+    await message.reply(
+        text="Ushbu habarni barchaga yuborishni tasdiqlaysizmi ?",
+        reply_markup=target_check()
+    )
+
+
+@router.callback_query(Target.target, lambda call: call.data.startswith('target_send'))
+async def send_advertisement(call: types.CallbackQuery, state: FSMContext):
+    await call.message.delete()
+    data = await state.get_data()
+    success, failed = await sendAdvertisement(message=call.message, msg_id=data.get('target'))
+    await call.message.answer(
+        text=f"Habar muvaffaqiyatli tarqatildi\n"
+             f"{success} ta odamga yuborildi ✅ va"
+             f"{failed} ta odamga yuborilmadi ❌"
+    )
+    await state.clear()
+
+
+@router.callback_query(Target.target, lambda call: call.data.startswith('target_cancel'))
+async def cancel_advertisement(call: types.CallbackQuery, state: FSMContext):
+    await call.message.delete()
+    await call.message.answer(
+        text="Habar bekor qilindi ✅"
+    )
+    await state.clear()

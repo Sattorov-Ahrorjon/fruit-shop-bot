@@ -92,3 +92,24 @@ async def order_list(pk):
         async with session.get(url=f'{domain}/order/{pk}/') as resp:
             response = await resp.json()
             return response
+
+
+async def sendAdvertisement(message: Message, msg_id):
+    result = await user_list()
+    users = result.get('result')
+    success = 0
+    failed = 0
+    async with aiohttp.ClientSession() as session:
+        for user in users:
+            async with session.post(
+                    url=f"https://api.telegram.org/bot{bot_token}/forwardMessage",
+                    data={
+                        "chat_id": user.get('telegram_id'),
+                        "from_chat_id": message.chat.id,
+                        "message_id": msg_id,
+                    }) as resp:
+                if resp.status == 200:
+                    success += 1
+                if resp.status != 200:
+                    failed += 1
+    return success, failed
