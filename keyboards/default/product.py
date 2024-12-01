@@ -35,6 +35,13 @@ ProductNumber = {
 }
 
 
+async def create_products_price(products):
+    result = {}
+    for pr in products:
+        result.update({f"{pr.get('name')} {pr.get('price')} so'm": str(pr.get('price'))})
+    _redis.set_products_price(result)
+
+
 def product_dict(data):
     result = {}
     for pr in data:
@@ -47,6 +54,7 @@ async def products_keyboard(lang):
     result = await product_list(lang)
     products = product_dict(result.get('result'))
     _redis.set_products(lang=lang, products=products)
+    await create_products_price(products)
     for prd in products:
         btn.add(KeyboardButton(text=prd))
     btn.add(KeyboardButton(text=Text.get('mainBtn').get(lang)))

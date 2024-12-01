@@ -73,3 +73,4 @@ async def product_number_handler(message: Message, state: FSMContext):
         text=answer_text.get(user_lang),
         reply_markup=await products_keyboard(user_lang)
     )
+    await state.clear()

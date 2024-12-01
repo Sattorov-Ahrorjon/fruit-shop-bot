@@ -5,12 +5,6 @@ class RedisService:
     def __init__(self, host: str = 'localhost', port: int = 6379, db: int = 0):
         self._redis = Redis(host=host, port=port, db=db, decode_responses=True)
 
-    def set_order_pk(self, user_id, order_pk: str):
-        self._redis.hset(name=str(user_id), key='order_pk', value=order_pk)
-
-    def get_order_pk(self, user_id):
-        return self._redis.hget(name=str(user_id), key='order_pk')
-
     def set_products(self, lang: str, products: dict):
         self._redis.hset(name=f'product_{lang}', mapping=products)
 
@@ -26,6 +20,16 @@ class RedisService:
         res_ru = self._redis.hgetall(name='product_ru')
         res_uz.update(res_ru)
         return res_uz
+
+    def set_products_price(self, data: dict):
+        self._redis.hset(name=f"products_price", mapping=data)
+
+    def get_product_price(self, p_name: str):
+        result = self._redis.hgetall(name=f"products_price")
+        return result.get(p_name)
+
+    def get_all_products_price(self):
+        return self._redis.hgetall(name='products_price')
 
     def set_user_basket(self, pk, data: dict):
         old_data = self._redis.hgetall(name=str(pk))
