@@ -7,7 +7,7 @@ from utils.regex_phone import regex_phone
 from keyboards.default.product import products_keyboard
 from utils.db_api.views import (
     user_detail, user_create, order_create,
-    group_notify)
+    group_notify, group_notify_map)
 from keyboards.default.payment import (
     pay_type_keyboard, payment_list, driver_time_keyboard,
     location_keyboard
@@ -74,7 +74,7 @@ async def all_to_pay(message: Message, state: FSMContext):
 
 @router.callback_query(lambda call: call.data.startswith("pay_"))
 async def product_to_pay(call: CallbackQuery, state: FSMContext):
-    result = await user_detail(call.message.from_user.id)
+    result = await user_detail(call.from_user.id)
     user_lang = result.get('result').get('language')
     answer_text = PayText.get(user_lang)
     await call.message.answer(
@@ -112,8 +112,10 @@ async def uz_to_pay(message: Message):
 
 @router.message(PaymentState.deliver_time)
 async def transferred_to_location(message: Message, state: FSMContext):
-    if message.text not in ("O'tqazib yuborish. ➡", "Пропуск. ➡"):
-        await state.update_data(data={'deliver_time': message.text})
+    deliver_time = message.text
+    if deliver_time in ("O'tqazib yuborish. ➡", "Пропуск. ➡"):
+        deliver_time = 'vaqt belgilanmagan'
+    await state.update_data(data={'deliver_time': deliver_time})
     result = await user_detail(message.from_user.id)
     user_lang = result.get('result').get('language')
     answer_text = LocationText.get(user_lang)
@@ -163,24 +165,49 @@ async def create_phone(message: Message, state: FSMContext):
         text=answer_text,
         reply_markup=await products_keyboard(user_lang)
     )
-    await state.update_data(data={'phone': message.text})
     data = await state.get_data()
     products = _redis.get_user_basket(message.from_user.id)
     if data.get('product') != 'all':
         amount = products.get(data.get('product'))
         products = {data.get('product'): amount}
-
-    # product_pk = _redis.get_product_pk(lang=user_lang, p_name=)
-
-    await order_create(
+    products_price = _redis.get_all_products_price()
+    notify_message = "Foydalanuvchidan yangi buyurtma olindi\n\n"
+    for prod, amount in products.items():
+        price = products_price.get(prod)
+        await order_create(
+            data={
+                "user": message.from_user.id,
+                "name": prod,
+                "price": price,
+                "total_price": int(amount) * int(price),
+                "count": amount
+            }
+        )
+        notify_message += (f"🔥 Mahsulot {prod}\n"
+                           f"Jami miqdori {amount} kg\n"
+                           f"Umumiy narxi {int(amount) * int(price)} so'm\n"
+                           f"To'lov turi {data.get('pay_type')}\n"
+                           f"Yetkazib berish vaqti {data.get('deliver_time')}\n"
+                           f"Bog'lanish uchun telefon raqam {message.text}\n\n")
+    location = data.get('location')
+    await user_create(
         data={
-            "name": "string",
-            "price": 9223372036854776000,
-            "total_price": 9223372036854776000,
-            "count": 9223372036854776000
+            "telegram_id": message.from_user.id,
+            "first_name": message.from_user.first_name,
+            "last_name": message.from_user.last_name,
+            "username": message.from_user.username,
+            "location": "string",
+            "latitude": location.get('lat'),
+            "longitude": location.get('lon'),
         }
     )
-
+    await group_notify(
+        message=notify_message
+    )
+    await group_notify_map(
+        message=message,
+        data=location
+    )
     _redis.delete_user_basket(pk=message.from_user.id, _all=True)
     await state.clear()
 
@@ -191,7 +218,7 @@ async def create_phone(message: Message):
     user_lang = result.get('result').get('language')
     await message.answer(
         text={
-            'uz': "Iltimos ko'rsatilgan tartibda (+998902223344) telefon raqam yuboring!",
+            'uz': "Iltimos ko'rsatilgan tartibda +998902223344 telefon raqam yuboring!",
             'ru': "Пожалуйста, пришлите номер телефона в указанном порядке (+998902223344)!"
         }.get(user_lang)
     )

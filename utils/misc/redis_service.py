@@ -6,6 +6,7 @@ class RedisService:
         self._redis = Redis(host=host, port=port, db=db, decode_responses=True)
 
     def set_products(self, lang: str, products: dict):
+        self._redis.delete(f'product_{lang}')
         self._redis.hset(name=f'product_{lang}', mapping=products)
 
     def get_products(self, lang: str):
@@ -22,6 +23,7 @@ class RedisService:
         return res_uz
 
     def set_products_price(self, data: dict):
+        self._redis.delete('products_price')
         self._redis.hset(name=f"products_price", mapping=data)
 
     def get_product_price(self, p_name: str):

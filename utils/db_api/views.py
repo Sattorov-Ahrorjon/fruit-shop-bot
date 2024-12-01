@@ -1,4 +1,5 @@
 import aiohttp
+from aiogram.types import Message
 from data.config import BACKEND_URL as domain
 from data.config import GROUP_ID, BOT_TOKEN as bot_token, ADMINS
 
@@ -11,6 +12,14 @@ async def group_notify(message: str = ''):
         ) as resp:
             response = await resp.json()
             return response
+
+
+async def group_notify_map(message: Message, data: dict):
+    await message.bot.send_location(
+        chat_id=GROUP_ID,
+        latitude=data.get('lat'),
+        longitude=data.get('lon')
+    )
 
 
 async def user_create(data: dict):

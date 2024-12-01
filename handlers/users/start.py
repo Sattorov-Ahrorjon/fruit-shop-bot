@@ -7,7 +7,7 @@ from keyboards.default.product import products_keyboard
 
 router = Router()
 
-MainBtn = ["Главная 🏠", "Bosh sahifa 🏠"]
+MainBtn = ("Главная 🏠", "Bosh sahifa 🏠")
 
 
 @router.message(lambda msg: msg.text in MainBtn or msg.text == '/start')
