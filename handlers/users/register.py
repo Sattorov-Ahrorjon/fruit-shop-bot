@@ -109,7 +109,7 @@ async def phone_number(message: Message, state: FSMContext):
     msg_text = Text.get('successfullyRegistered').get(lang)
     await message.answer(
         text=msg_text,
-        reply_markup=await products_keyboard()
+        reply_markup=await products_keyboard(lang)
     )
     await user_create(
         data={

@@ -1,5 +1,16 @@
 import aiohttp
 from data.config import BACKEND_URL as domain
+from data.config import GROUP_ID, BOT_TOKEN as bot_token, ADMINS
+
+
+async def group_notify(message: str = ''):
+    async with aiohttp.ClientSession() as session:
+        async with session.post(
+                url=f'https://api.telegram.org/bot{bot_token}/sendMessage',
+                data={'chat_id': GROUP_ID, 'text': message}
+        ) as resp:
+            response = await resp.json()
+            return response
 
 
 async def user_create(data: dict):
@@ -14,8 +25,10 @@ async def user_create(data: dict):
 async def user_detail(pk):
     async with aiohttp.ClientSession() as session:
         async with session.get(url=f'{domain}/user/{pk}/') as resp:
-            response = await resp.json()
-            return response
+            if resp.status == 200:
+                response = await resp.json()
+                return response
+            return {}
 
 
 async def user_list():
@@ -39,14 +52,16 @@ async def product_list(lang):
             if resp.status == 200:
                 response = await resp.json()
                 return response
-            return
+            return {}
 
 
-async def product_detail(pk):
+async def product_detail(pk, lang):
     async with aiohttp.ClientSession() as session:
-        async with session.get(url=f'{domain}/product/{pk}/') as resp:
-            response = await resp.json()
-            return response
+        async with session.get(url=f'{domain}/product/{pk}/', headers={'Accept-Language': lang}) as resp:
+            if resp.status == 200:
+                response = await resp.json()
+                return response
+            return {}
 
 
 async def order_create(data: dict):
