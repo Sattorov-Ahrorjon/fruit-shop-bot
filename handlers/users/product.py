@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from utils.db_api.views import product_detail, user_detail
 from utils.misc.redis_service import RedisService
 from keyboards.default.product import (
-    product_number_keyboard, ProductNumber, products_keyboard
+    product_number_keyboard, products_keyboard
 )
 
 router = Router()
@@ -52,13 +52,13 @@ async def product_detail_handler(message: Message, state: FSMContext):
     await state.update_data(data={'product_name': message.text})
 
 
-@router.message(lambda msg: msg.text in ProductNumber)
+@router.message(lambda msg: msg.text is not None and msg.text.isdigit())
 async def product_number_handler(message: Message, state: FSMContext):
     result = await user_detail(message.from_user.id)
     user_lang = result.get('result').get('language')
     data = await state.get_data()
     product_name = data.get('product_name')
-    number = ProductNumber.get(message.text)
+    number = str(int(message.text))
     _redis.set_user_basket(
         pk=message.from_user.id,
         data={f'{product_name}': number}

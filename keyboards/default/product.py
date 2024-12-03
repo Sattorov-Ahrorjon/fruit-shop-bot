@@ -27,13 +27,6 @@ Text = {
     }
 }
 
-ProductNumber = {
-    '1️⃣': '1', '2️⃣': '2', '3️⃣': '3',
-    '4️⃣': '4', '5️⃣': '5', '6️⃣': '6',
-    '7️⃣': '7', '8️⃣': '8', '9️⃣': '9',
-    '🔟': '10'
-}
-
 
 async def create_products_price(products):
     result = {}
@@ -71,7 +64,7 @@ async def products_keyboard(lang):
 
 def product_number_keyboard(lang):
     btn = ReplyKeyboardBuilder()
-    for text in ProductNumber:
+    for text in ('1', '2', '3', '4', '5', '6', '7', '8', '9', '10'):
         btn.add(KeyboardButton(text=text))
     btn.add(KeyboardButton(text=Text.get('mainBtn').get(lang)))
     btn.adjust(*[3, 3, 3, 1, 2])
@@ -80,12 +73,14 @@ def product_number_keyboard(lang):
 
 def basket_product(pk):
     products = _redis.get_user_basket(pk)
-    return list(map(lambda text: text + ' ' + '🧺', products))
+    return list(map(lambda text: text + ' ' + '❌', products))
 
 
 def basket_product_keyboard(pk, lang):
     products = basket_product(pk)
     btn = ReplyKeyboardBuilder()
+    if not products:
+        return
     for name in products:
         btn.add(KeyboardButton(text=name))
     btn.add(KeyboardButton(text=Text.get('mainBtn').get(lang)))

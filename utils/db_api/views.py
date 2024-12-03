@@ -102,11 +102,11 @@ async def sendAdvertisement(message: Message, msg_id):
     async with aiohttp.ClientSession() as session:
         for user in users:
             async with session.post(
-                    url=f"https://api.telegram.org/bot{bot_token}/forwardMessage",
+                    url=f"https://api.telegram.org/bot{bot_token}/copyMessage",
                     data={
                         "chat_id": user.get('telegram_id'),
                         "from_chat_id": message.chat.id,
-                        "message_id": msg_id,
+                        "message_id": msg_id
                     }) as resp:
                 if resp.status == 200:
                     success += 1

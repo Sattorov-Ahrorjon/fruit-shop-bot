@@ -1,3 +1,4 @@
+from data.config import get_admins
 from aiogram import types, Router
 from aiogram.fsm.context import FSMContext
 from states.register import Register
@@ -33,10 +34,10 @@ async def bot_start(message: types.Message, state: FSMContext):
     await state.set_state(Register.lang)
     if lang:
         msg_text = {
-            'uz': "Assalomu alaykum. Online buyurtma berish botimizga xush kelibsiz !\n"
-                  "Berilgan mahsulotlardan birini tanlang 🍎\n\n",
-            'ru': "Здравствуйте. Добро пожаловать в наш бот для онлайн-заказов !\n"
-                  "Выберите один из представленных продуктов 🍎"
+            'uz': "🏠 Siz asosiy sahifadasiz\n\n"
+                  "Kerakli buyuruqni tanlang 👇",
+            'ru': "🏠 Вы находитесь на главной странице\n\n"
+                  "Выберите нужную команду 👇"
         }.get(lang)
         reply_btn = await products_keyboard(lang)
         await state.clear()
@@ -46,7 +47,7 @@ async def bot_start(message: types.Message, state: FSMContext):
     )
 
 
-@router.message(lambda msg: msg.text == '/target')
+@router.message(lambda msg: msg.text == '/target' and msg.from_user.id in get_admins())
 async def create_advertisement(message: types.Message, state: FSMContext):
     await message.answer(
         text="Tayyorlangan reklama habaringizni telegram botga yuborishingiz mumkin\n"
@@ -55,7 +56,7 @@ async def create_advertisement(message: types.Message, state: FSMContext):
     await state.set_state(Target.target)
 
 
-@router.message(Target.target)
+@router.message(Target.target, lambda msg: msg.from_user.id in get_admins())
 async def send_advertisement(message: types.Message, state: FSMContext):
     await state.update_data({'target': message.message_id})
     await message.reply(
@@ -64,20 +65,22 @@ async def send_advertisement(message: types.Message, state: FSMContext):
     )
 
 
-@router.callback_query(Target.target, lambda call: call.data.startswith('target_send'))
+@router.callback_query(
+    Target.target, lambda call: call.data.startswith('target_send') and call.from_user.id in get_admins())
 async def send_advertisement(call: types.CallbackQuery, state: FSMContext):
     await call.message.delete()
     data = await state.get_data()
     success, failed = await sendAdvertisement(message=call.message, msg_id=data.get('target'))
     await call.message.answer(
-        text=f"Habar muvaffaqiyatli tarqatildi\n"
-             f"{success} ta odamga yuborildi ✅ va"
-             f"{failed} ta odamga yuborilmadi ❌"
+        text=f"Habar muvaffaqiyatli tarqatildi\n\n"
+             f"✅ {success} ta odam bordi\n"
+             f"❌ {failed} ta odamga bormadi"
     )
     await state.clear()
 
 
-@router.callback_query(Target.target, lambda call: call.data.startswith('target_cancel'))
+@router.callback_query(
+    Target.target, lambda call: call.data.startswith('target_cancel') and call.from_user.id in get_admins())
 async def cancel_advertisement(call: types.CallbackQuery, state: FSMContext):
     await call.message.delete()
     await call.message.answer(

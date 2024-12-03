@@ -114,7 +114,7 @@ async def uz_to_pay(message: Message):
 async def transferred_to_location(message: Message, state: FSMContext):
     deliver_time = message.text
     if deliver_time in ("O'tqazib yuborish. ➡", "Пропуск. ➡"):
-        deliver_time = 'vaqt belgilanmagan'
+        deliver_time = 'Vaqt belgilanmagan'
     await state.update_data(data={'deliver_time': deliver_time})
     result = await user_detail(message.from_user.id)
     user_lang = result.get('result').get('language')
@@ -160,6 +160,7 @@ async def location_create(message: Message):
 async def create_phone(message: Message, state: FSMContext):
     result = await user_detail(message.from_user.id)
     user_lang = result.get('result').get('language')
+    user_phone = result.get('result').get('phone')
     answer_text = DoneText.get(user_lang)
     await message.answer(
         text=answer_text,
@@ -171,7 +172,11 @@ async def create_phone(message: Message, state: FSMContext):
         amount = products.get(data.get('product'))
         products = {data.get('product'): amount}
     products_price = _redis.get_all_products_price()
-    notify_message = "Foydalanuvchidan yangi buyurtma olindi\n\n"
+    username = ''
+    if message.from_user.username:
+        username = '\n@' + message.from_user.username
+    notify_message = f"Foydalanuvchi: {message.from_user.full_name}{username}\n\n"
+    total_price = 0
     for prod, amount in products.items():
         price = products_price.get(prod)
         await order_create(
@@ -183,12 +188,15 @@ async def create_phone(message: Message, state: FSMContext):
                 "count": amount
             }
         )
-        notify_message += (f"🔥 Mahsulot {prod}\n"
-                           f"Jami miqdori {amount} kg\n"
-                           f"Umumiy narxi {int(amount) * int(price)} so'm\n"
-                           f"To'lov turi {data.get('pay_type')}\n"
-                           f"Yetkazib berish vaqti {data.get('deliver_time')}\n"
-                           f"Bog'lanish uchun telefon raqam {message.text}\n\n")
+        notify_message += (f"🔥 Mahsulot: {prod}\n"
+                           f"🧮  {amount} x {price} = {int(amount) * int(price)} so'm\n\n")
+        total_price += int(amount) * int(price)
+
+    notify_message += (f"🔣 To'lov turi: {data.get('pay_type')}\n"
+                       f"💸 Jami summa: {total_price} so'm\n\n"
+                       f"🕑 Yetkazib berish vaqti: {data.get('deliver_time')}\n"
+                       f"📱 Telefon raqami: {user_phone}\n"
+                       f"☎ Qo'shimcha telefon raqam: {message.text}")
     location = data.get('location')
     await user_create(
         data={
