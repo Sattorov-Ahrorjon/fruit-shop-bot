@@ -25,26 +25,28 @@ async def bot_start(message: types.Message, state: FSMContext):
             'username': message.from_user.username,
         }
     )
-    reply_btn = language()
-    msg_text = ("Assalomu alaykum. Online buyurtma berish botimizga xush kelibsiz !\n"
-                "Berilgan mahsulotlardan birini tanlang 🍎\n\n"
-                "Здравствуйте. Добро пожаловать в наш бот для онлайн-заказов !\n"
-                "Выберите один из представленных продуктов 🍎")
-    await state.set_state(Register.lang)
-    if res:
+    print(res)
+    if res and res.get('lang'):
         lang = res.get('lang')
-        msg_text = {
-            'uz': "🏠 Siz asosiy sahifadasiz\n\n"
-                  "Kerakli buyuruqni tanlang 👇",
-            'ru': "🏠 Вы находитесь на главной странице\n\n"
-                  "Выберите нужную команду 👇"
-        }.get(lang)
-        reply_btn = await products_keyboard(lang)
+        await message.answer(
+            text={
+                'uz': "🏠 Siz asosiy sahifadasiz\n\n"
+                      "Kerakli buyuruqni tanlang 👇",
+                'ru': "🏠 Вы находитесь на главной странице\n\n"
+                      "Выберите нужную команду 👇"
+            }.get(lang),
+            reply_markup=await products_keyboard(lang)
+        )
         await state.clear()
+        return
     await message.answer(
-        text=msg_text,
-        reply_markup=reply_btn
+        text="Assalomu alaykum. Online buyurtma berish botimizga xush kelibsiz !\n"
+             "Berilgan mahsulotlardan birini tanlang 🍎\n\n"
+             "Здравствуйте. Добро пожаловать в наш бот для онлайн-заказов !\n"
+             "Выберите один из представленных продуктов 🍎",
+        reply_markup=language()
     )
+    await state.set_state(Register.lang)
 
 
 @router.message(lambda msg: msg.text == '/target' and msg.from_user.id in get_admins())

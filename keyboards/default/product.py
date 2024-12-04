@@ -47,6 +47,11 @@ def product_dict(data, lang):
 async def products_keyboard(lang):
     btn = ReplyKeyboardBuilder()
     result = await product_list(lang)
+    if not result.get('result'):
+        btn.add(KeyboardButton(text=Text.get('mainBtn').get(lang)))
+        btn.add(KeyboardButton(text=Text.get('basketBtn').get(lang)))
+        btn.adjust(*[2])
+        return btn.as_markup(resize_keyboard=True)
     await create_products_price(result.get('result'), lang)
     products = product_dict(result.get('result'), lang)
     _redis.set_products(products=products)
