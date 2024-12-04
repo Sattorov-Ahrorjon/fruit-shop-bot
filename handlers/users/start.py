@@ -25,14 +25,14 @@ async def bot_start(message: types.Message, state: FSMContext):
             'username': message.from_user.username,
         }
     )
-    lang = res.get('lang')
     reply_btn = language()
     msg_text = ("Assalomu alaykum. Online buyurtma berish botimizga xush kelibsiz !\n"
                 "Berilgan mahsulotlardan birini tanlang 🍎\n\n"
                 "Здравствуйте. Добро пожаловать в наш бот для онлайн-заказов !\n"
                 "Выберите один из представленных продуктов 🍎")
     await state.set_state(Register.lang)
-    if lang:
+    if res:
+        lang = res.get('lang')
         msg_text = {
             'uz': "🏠 Siz asosiy sahifadasiz\n\n"
                   "Kerakli buyuruqni tanlang 👇",
