@@ -25,7 +25,6 @@ async def bot_start(message: types.Message, state: FSMContext):
             'username': message.from_user.username,
         }
     )
-    print(res)
     if res and res.get('lang'):
         lang = res.get('lang')
         await message.answer(
