@@ -11,7 +11,7 @@ environs==8.0.0
 frozenlist==1.5.0
 idna==3.10
 magic-filter==1.0.12
-marshmallow==3.23.1
+marshmallow==3.22.0
 multidict==6.1.0
 packaging==24.2
 propcache==0.2.0
