@@ -49,7 +49,7 @@ async def products_keyboard(lang):
     result = await product_list(lang)
     await create_products_price(result.get('result'), lang)
     products = product_dict(result.get('result'), lang)
-    _redis.set_products(lang=lang, products=products)
+    _redis.set_products(products=products)
     for prd in products:
         btn.add(KeyboardButton(text=prd))
     btn.add(KeyboardButton(text=Text.get('mainBtn').get(lang)))

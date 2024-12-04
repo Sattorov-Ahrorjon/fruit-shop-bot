@@ -1,7 +1,7 @@
 import aiohttp
 from aiogram.types import Message
 from data.config import BACKEND_URL as domain
-from data.config import GROUP_ID, BOT_TOKEN as bot_token, ADMINS
+from data.config import GROUP_ID, BOT_TOKEN as bot_token
 
 
 async def group_notify(message: str = ''):

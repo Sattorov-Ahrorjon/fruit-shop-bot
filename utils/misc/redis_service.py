@@ -5,22 +5,20 @@ class RedisService:
     def __init__(self, host: str = 'localhost', port: int = 6379, db: int = 0):
         self._redis = Redis(host=host, port=port, db=db, decode_responses=True)
 
-    def set_products(self, lang: str, products: dict):
-        self._redis.delete(f'product_{lang}')
-        self._redis.hset(name=f'product_{lang}', mapping=products)
+    def set_products(self, products: dict):
+        self._redis.delete(f'products')
+        self._redis.hset(name=f'products', mapping=products)
 
-    def get_products(self, lang: str):
-        return self._redis.hgetall(name=f'product_{lang}')
+    def get_products(self):
+        return self._redis.hgetall(name=f'products')
 
-    def get_product_pk(self, lang: str, p_name: str):
-        res = self._redis.hgetall(name=f'product_{lang}')
+    def get_product_pk(self, p_name: str):
+        res = self._redis.hgetall(name=f'products')
         return int(res.get(p_name))
 
     def get_all_products(self):
-        res_uz = self._redis.hgetall(name='product_uz')
-        res_ru = self._redis.hgetall(name='product_ru')
-        res_uz.update(res_ru)
-        return res_uz
+        response = self._redis.hgetall(name='products')
+        return response
 
     def set_products_price(self, data: dict):
         self._redis.delete('products_price')

@@ -30,7 +30,7 @@ def product_caption(product, lang):
     about = product.get('description')
     caption = {
         'uz': (f"<b>Nomi:</b> {name}\n\n"
-               f"<b>Haqida:</b> <b>{about}\n\n"
+               f"<b>Haqida:</b>{about}\n\n"
                f"<b>Narxi:</b> {price} so'm/{amount}.\n"),
         'ru': (f"<b>Имя:</b> {name}\n\n"
                f"<b>О продукте:</b> {about}\n\n"
@@ -43,7 +43,7 @@ def product_caption(product, lang):
 async def product_detail_handler(message: Message, state: FSMContext):
     result = await user_detail(message.from_user.id)
     user_lang = result.get('result').get('language')
-    product_pk = _redis.get_product_pk(lang=user_lang, p_name=message.text)
+    product_pk = _redis.get_product_pk(p_name=message.text)
     result = await product_detail(pk=product_pk, lang=user_lang)
     product = result.get('result')
     caption = product_caption(product, user_lang)
