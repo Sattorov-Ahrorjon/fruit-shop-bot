@@ -61,9 +61,8 @@ async def products_keyboard(lang):
     btn.add(KeyboardButton(text=Text.get('basketBtn').get(lang)))
 
     key_order = []
-    len(products) == 1 and key_order.append(1)
-    len(products) >= 2 and key_order.append(2)
-    len(products) > 2 and len(products) % 2 == 1 and key_order.append(1)
+    for i in range(len(products)):
+        key_order.append(1)
     key_order.append(2)
     btn.adjust(*key_order)
     return btn.as_markup(resize_keyboard=True)
