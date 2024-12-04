@@ -92,9 +92,8 @@ def basket_product_keyboard(pk, lang):
     btn.add(KeyboardButton(text=Text.get('mainBtn').get(lang)))
     btn.add(KeyboardButton(text=Text.get('payBtn').get(lang)))
     prod = []
-    len(products) >= 2 and prod.append(2)
-    len(products) == 1 and prod.append(1)
-    len(products) > 2 and len(products) % 2 == 1 and prod.append(1)
+    for i in range(len(products)):
+        prod.append(1)
     prod.append(2)
     btn.adjust(*prod)
     return btn.as_markup(resize_keyboard=True)
