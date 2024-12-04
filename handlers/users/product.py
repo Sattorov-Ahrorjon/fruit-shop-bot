@@ -13,12 +13,12 @@ _redis = RedisService()
 
 Amount = {
     'uz': {
-        1: "1 donasi",
-        2: "1 kilogrami"
+        1: "dona",
+        2: "kg"
     },
     'ru': {
-        1: "1 шт.",
-        2: "1 кг"
+        1: "шт",
+        2: "кг"
     }
 }
 
@@ -27,11 +27,14 @@ def product_caption(product, lang):
     name = product.get('name')
     price = product.get('price')
     amount = Amount.get(lang).get(product.get('amount'))
+    about = product.get('description')
     caption = {
-        'uz': (f"Mahsulot nomi {name}\n"
-               f"Ushbu mahsulotning {amount} {price} so'm."),
-        'ru': (f"Название продукта {name}\n"
-               f"{amount} этого продукта {price} сум.")
+        'uz': (f"<b>Nomi:</b> {name}\n\n"
+               f"<b>Haqida:</b> <b>{about}\n\n"
+               f"<b>Narxi:</b> {price} so'm/{amount}.\n"),
+        'ru': (f"<b>Имя:</b> {name}\n\n"
+               f"<b>О продукте:</b> {about}\n\n"
+               f"<b>Стоимость:</b> {price} сум/{amount}.\n"),
     }
     return caption.get(lang)
 
@@ -64,10 +67,10 @@ async def product_number_handler(message: Message, state: FSMContext):
         data={f'{product_name}': number}
     )
     answer_text = {
-        'uz': "Mahsulot savatga qo'shildi 🧺\n"
-              "Marhamat yana boshqa turdagi mahsulotni tanlang 🙂",
-        'ru': "Товар добавлен в корзину 🧺\n"
-              "Пожалуйста, снова выберите другой тип продукта 🙂"
+        'uz': "✅ Mahsulot savatga qo'shildi 🧺\n\n"
+              "Yana boshqa mahsulotni tanlaymizmi 🙂",
+        'ru': "✅ Товар добавлен в корзину 🧺\n\n"
+              "Выберем другой продукт 🙂"
     }
     await message.answer(
         text=answer_text.get(user_lang),

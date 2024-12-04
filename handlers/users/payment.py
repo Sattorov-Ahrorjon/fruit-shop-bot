@@ -39,9 +39,9 @@ LocationText = {
 
 PhoneText = {
     'uz': "Siz bilan bog'lanishimiz uchun qo'shimcha telefon raqam kiriting.\n"
-          "Iltimos berilgan shaklda yuboring +998902223344",
+          "Iltimos berilgan shaklda yuboring +998909993344",
     'ru': "Введите дополнительный номер телефона, чтобы мы могли связаться с вами.\n"
-          "Отправьте пожалуйста по данной форме +998902223344"
+          "Отправьте пожалуйста по данной форме +998909993344"
 }
 
 DoneText = {
@@ -226,7 +226,7 @@ async def create_phone(message: Message):
     user_lang = result.get('result').get('language')
     await message.answer(
         text={
-            'uz': "Iltimos ko'rsatilgan tartibda +998902223344 telefon raqam yuboring!",
-            'ru': "Пожалуйста, пришлите номер телефона в указанном порядке (+998902223344)!"
+            'uz': "Iltimos ko'rsatilgan tartibda +998909993344 telefon raqam yuboring!",
+            'ru': "Пожалуйста, пришлите номер телефона в указанном порядке +998909993344!"
         }.get(user_lang)
     )

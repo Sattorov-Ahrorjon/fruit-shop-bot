@@ -28,25 +28,27 @@ Text = {
 }
 
 
-async def create_products_price(products):
+async def create_products_price(products, lang):
     result = {}
+    unit = {'uz': "so'm", 'ru': 'сум'}.get(lang)
     for pr in products:
-        result.update({f"{pr.get('name')} {pr.get('price')} so'm": str(pr.get('price'))})
+        result.update({f"{pr.get('name')} {pr.get('price')} {unit}": str(pr.get('price'))})
     _redis.set_products_price(result)
 
 
-def product_dict(data):
+def product_dict(data, lang):
     result = {}
+    unit = {'uz': "so'm", 'ru': 'сум'}.get(lang)
     for pr in data:
-        result.update({f"{pr.get('name')} {pr.get('price')} so'm": str(pr.get('id'))})
+        result.update({f"{pr.get('name')} {pr.get('price')} {unit}": str(pr.get('id'))})
     return result
 
 
 async def products_keyboard(lang):
     btn = ReplyKeyboardBuilder()
     result = await product_list(lang)
-    await create_products_price(result.get('result'))
-    products = product_dict(result.get('result'))
+    await create_products_price(result.get('result'), lang)
+    products = product_dict(result.get('result'), lang)
     _redis.set_products(lang=lang, products=products)
     for prd in products:
         btn.add(KeyboardButton(text=prd))

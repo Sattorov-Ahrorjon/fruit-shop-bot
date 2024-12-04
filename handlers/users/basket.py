@@ -1,5 +1,5 @@
 from aiogram import Router
-from aiogram.types import Message, CallbackQuery  # URLInputFile
+from aiogram.types import Message
 from utils.misc.redis_service import RedisService
 from utils.db_api.views import user_detail
 from keyboards.default.product import (
@@ -11,31 +11,23 @@ router = Router()
 
 _redis = RedisService()
 
-Amount = {
-    'uz': {
-        1: "dona",
-        2: "kilogram"
-    },
-    'ru': {
-        1: "шт.",
-        2: "кг"
-    }
-}
-
 
 def user_basket_orders(pk, lang):
     orders = _redis.get_user_basket(pk)
-    order_text = ''
+    order_text_uz = ''
+    order_text_ru = ''
     total_price = 0
     for name, number in orders.items():
         price = _redis.get_product_price(name)
         total_price += int(number) * int(price)
-        order_text += (f"🔅 {name}\n"
-                       f"🧮  {number} x {price} = {int(number) * int(price)}\n\n")
+        order_text_uz += (f"<b>Nomi:</b> {name}\n"
+                          f"<b>Jami:</b> {number} x {price} = {int(number) * int(price)} so'm\n\n")
+        order_text_ru += (f"<b>Имя:</b> {name}\n"
+                          f"<b>Итого:</b> {number} x {price} = {int(number) * int(price)} сум\n\n")
 
-    order_text += f"💲 {total_price}"
-    return order_text
-
+    order_text_uz += f"<b>Umumiy narx:</b> {total_price} so'm"
+    order_text_ru += f"<b>Общая стоимость:</b> {total_price} сум"
+    return {'uz': order_text_uz, 'ru': order_text_ru}.get(lang)
 
 
 @router.message(lambda msg: msg.text in ("Моя корзина 🧺", "Meni savatim 🧺"))
@@ -55,11 +47,9 @@ async def user_basket(message: Message):
     await message.answer(
         text={
             'uz': "🧺 mahsulotlar. 🍎🍇\n\n"
-                  "Bekor qilish uchun «Mahsulot nomi ❌»\n"
-                  "Savatni tozalash uchun «Tozalash 🔄»",
+                  "Bekor qilish uchun «Mahsulot nomi ❌»\n",
             'ru': "Товары в вашей корзине. 🍎🍇\n\n"
                   "«❌ Название продукта» для отмены\n"
-                  "«🔄 Очистить», чтобы очистить корзину."
         }.get(user_lang),
         reply_markup=key_btn
     )
@@ -90,11 +80,9 @@ async def user_basket_delete(message: Message):
     await message.answer(
         text={
             'uz': "🧺 mahsulotlar. 🍎🍇\n\n"
-                  "Bekor qilish uchun «Mahsulot nomi ❌»\n"
-                  "Savatni tozalash uchun «Tozalash 🔄»",
+                  "Bekor qilish uchun «Mahsulot nomi ❌»\n",
             'ru': "Товары в вашей корзине. 🍎🍇\n\n"
                   "«❌ Название продукта» для отмены\n"
-                  "«🔄 Очистить», чтобы очистить корзину."
         }.get(user_lang),
         reply_markup=key_btn
     )
