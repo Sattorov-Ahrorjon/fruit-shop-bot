@@ -13,10 +13,10 @@ Text = {
     'askForPhone': {
         'uz': "Iltimos telefon raqamingizni\n"
               "Telefon raqam 📱 tugmasi orqali yoki\n"
-              "+998901234455 ko'rinishda yuboring.",
+              "+9989ixxxyyzz ko'rinishda yuboring.",
         'ru': "Ваш номер телефона, пожалуйста\n"
               "Номер телефона через кнопку 📱 или\n"
-              "«Отправить на номер +998901234455»."
+              "«Отправить на номер +9989ixxxyyzz»."
     },
     'successfullyRegistered': {
         'uz': "Ro'yxatdan o'tish muvaffaqiyatli amalga oshirildi 🔥\n"
