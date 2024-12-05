@@ -144,7 +144,6 @@ async def update_language02(message: Message, state: FSMContext):
     await user_create(
         data={
             'telegram_id': message.from_user.id,
-            'phone': message.text,
             'language': lang
         }
     )
