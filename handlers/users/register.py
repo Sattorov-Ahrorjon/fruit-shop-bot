@@ -2,10 +2,10 @@ from aiogram import Router
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 from utils.regex_phone import regex_phone
-from states.register import Register
+from states.register import Register, UpdateLang
 from keyboards.default.user import language, phone_number_btn
 from keyboards.default.product import products_keyboard
-from utils.db_api.views import user_create
+from utils.db_api.views import user_create, user_detail
 
 router = Router()
 
@@ -75,7 +75,7 @@ async def phone_number(message: Message, state: FSMContext):
     msg_text = Text.get('successfullyRegistered').get(lang)
     await message.answer(
         text=msg_text,
-        reply_markup=await products_keyboard()
+        reply_markup=await products_keyboard(lang)
     )
     await user_create(
         data={
@@ -119,3 +119,56 @@ async def phone_number(message: Message, state: FSMContext):
         }
     )
     await state.clear()
+
+
+@router.message(lambda msg: msg.text and msg.text in ("Til ♻️", "Язык ♻️"))
+async def update_language(message: Message, state: FSMContext):
+    result = await user_detail(message.from_user.id)
+    user_lang = result.get('result').get('language')
+    await message.answer(
+        text={
+            'uz': "Kerakli tilni tanlang 🙂",
+            'ru': "Выберите желаемый язык 🙂"
+        }.get(user_lang),
+        reply_markup=language()
+    )
+    await state.set_state(UpdateLang.lang)
+
+
+@router.message(UpdateLang.lang, lambda msg: msg.text and msg.text in ("O'zbek tili 🇺🇿", "Русский язык 🇷🇺"))
+async def update_language02(message: Message, state: FSMContext):
+    lang = {
+        "O'zbek tili 🇺🇿": 'uz',
+        "Русский язык 🇷🇺": 'ru'
+    }.get(message.text)
+    await user_create(
+        data={
+            'telegram_id': message.from_user.id,
+            'phone': message.text,
+            'language': lang
+        }
+    )
+    await state.clear()
+    await message.answer(
+        text={
+            'uz': "🏠 Siz asosiy sahifadasiz\n\n"
+                  "Kerakli buyuruqni tanlang 👇",
+            'ru': "🏠 Вы находитесь на главной странице\n\n"
+                  "Выберите нужную команду 👇"
+        }.get(lang),
+        reply_markup=await products_keyboard(lang)
+    )
+    await state.clear()
+
+
+@router.message(UpdateLang.lang, lambda msg: msg.text and msg.text not in ("O'zbek tili 🇺🇿", "Русский язык 🇷🇺"))
+async def update_language03(message: Message):
+    result = await user_detail(message.from_user.id)
+    user_lang = result.get('result').get('language')
+    await message.answer(
+        text={
+            'uz': "Iltimos Kerakli tilni tanlang 😐",
+            'ru': "Пожалуйста, выберите желаемый язык 😐"
+        }.get(user_lang),
+        reply_markup=language()
+    )

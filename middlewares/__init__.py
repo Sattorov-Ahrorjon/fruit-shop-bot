@@ -1,9 +1,5 @@
 from loader import dp
-from .anti_flood import AntiFloodMiddleware
-from .check_sub import CheckSubMiddleware
-
+from .checkType import CheckChatTypeMiddleware
 
 if __name__ == "middlewares":
-    # dp.message.middleware(AntiFloodMiddleware())
-    # dp.message.middleware(CheckSubMiddleware())
-    pass
+    dp.message.middleware(CheckChatTypeMiddleware())
